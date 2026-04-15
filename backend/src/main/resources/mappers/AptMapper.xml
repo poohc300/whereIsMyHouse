@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.housing.apt.mapper.AptMapper">
+
+    <!-- ============================== AptComplex ============================== -->
+
+    <resultMap id="complexResultMap" type="com.example.housing.apt.model.AptComplex">
+        <id     property="id"             column="id"/>
+        <result property="complexNo"      column="complex_no"/>
+        <result property="name"           column="name"/>
+        <result property="roadAddr"       column="road_addr"/>
+        <result property="sido"           column="sido"/>
+        <result property="sigungu"        column="sigungu"/>
+        <result property="dong"           column="dong"/>
+        <result property="bjdongCode"     column="bjdong_code"/>
+        <result property="lat"            column="lat"/>
+        <result property="lng"            column="lng"/>
+        <result property="totalHousehold" column="total_household"/>
+        <result property="buildYear"      column="build_year"/>
+        <result property="createdAt"      column="created_at"/>
+    </resultMap>
+
+    <select id="findComplexById" resultMap="complexResultMap">
+        SELECT * FROM apt_complex WHERE id = #{id}
+    </select>
+
+    <select id="findComplexByNameAndBjdong" resultMap="complexResultMap">
+        SELECT * FROM apt_complex
+        WHERE name = #{name} AND bjdong_code = #{bjdongCode}
+        LIMIT 1
+    </select>
+
+    <select id="findComplexByComplexNo" resultMap="complexResultMap">
+        SELECT * FROM apt_complex WHERE complex_no = #{complexNo}
+    </select>
+
+    <select id="findComplexesByBjdong" resultMap="complexResultMap">
+        SELECT * FROM apt_complex WHERE bjdong_code = #{bjdongCode}
+    </select>
+
+    <insert id="insertComplex" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO apt_complex (complex_no, name, road_addr, sido, sigungu, dong, bjdong_code,
+                                 lat, lng, total_household, build_year)
+        VALUES (#{complexNo}, #{name}, #{roadAddr}, #{sido}, #{sigungu}, #{dong}, #{bjdongCode},
+                #{lat}, #{lng}, #{totalHousehold}, #{buildYear})
+    </insert>
+
+    <update id="updateComplexCoords">
+        UPDATE apt_complex SET lat = #{lat}, lng = #{lng} WHERE id = #{id}
+    </update>
+
+    <!-- ============================== AptTrade ============================== -->
+
+    <resultMap id="tradeResultMap" type="com.example.housing.apt.model.AptTrade">
+        <id     property="id"         column="id"/>
+        <result property="complexId"  column="complex_id"/>
+        <result property="dealYear"   column="deal_year"/>
+        <result property="dealMonth"  column="deal_month"/>
+        <result property="dealDay"    column="deal_day"/>
+        <result property="area"       column="area"/>
+        <result property="floor"      column="floor"/>
+        <result property="price"      column="price"/>
+        <result property="createdAt"  column="created_at"/>
+    </resultMap>
+
+    <select id="findTradesByComplexId" resultMap="tradeResultMap">
+        SELECT * FROM apt_trade
+        WHERE complex_id = #{complexId}
+        ORDER BY deal_year DESC, deal_month DESC, deal_day DESC
+    </select>
+
+    <select id="findTradesByBjdong" resultMap="tradeResultMap">
+        SELECT t.* FROM apt_trade t
+        JOIN apt_complex c ON t.complex_id = c.id
+        WHERE c.bjdong_code = #{bjdongCode}
+          AND t.deal_year = #{year}
+          AND t.deal_month = #{month}
+        ORDER BY t.price DESC
+    </select>
+
+    <select id="existsTrade" resultType="boolean">
+        SELECT EXISTS (
+            SELECT 1 FROM apt_trade
+            WHERE complex_id = #{complexId}
+              AND deal_year = #{dealYear}
+              AND deal_month = #{dealMonth}
+              AND deal_day = #{dealDay}
+              AND area = #{area}
+              AND floor = #{floor}
+        )
+    </select>
+
+    <insert id="insertTrade" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO apt_trade (complex_id, deal_year, deal_month, deal_day, area, floor, price)
+        VALUES (#{complexId}, #{dealYear}, #{dealMonth}, #{dealDay}, #{area}, #{floor}, #{price})
+    </insert>
+
+    <!-- ============================== AptRent ============================== -->
+
+    <resultMap id="rentResultMap" type="com.example.housing.apt.model.AptRent">
+        <id     property="id"          column="id"/>
+        <result property="complexId"   column="complex_id"/>
+        <result property="rentType"    column="rent_type"/>
+        <result property="dealYear"    column="deal_year"/>
+        <result property="dealMonth"   column="deal_month"/>
+        <result property="area"        column="area"/>
+        <result property="floor"       column="floor"/>
+        <result property="deposit"     column="deposit"/>
+        <result property="monthlyRent" column="monthly_rent"/>
+        <result property="createdAt"   column="created_at"/>
+    </resultMap>
+
+    <select id="findRentsByComplexId" resultMap="rentResultMap">
+        SELECT * FROM apt_rent
+        WHERE complex_id = #{complexId}
+        ORDER BY deal_year DESC, deal_month DESC
+    </select>
+
+    <select id="existsRent" resultType="boolean">
+        SELECT EXISTS (
+            SELECT 1 FROM apt_rent
+            WHERE complex_id = #{complexId}
+              AND deal_year = #{dealYear}
+              AND deal_month = #{dealMonth}
+              AND area = #{area}
+              AND floor = #{floor}
+              AND deposit = #{deposit}
+        )
+    </select>
+
+    <insert id="insertRent" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO apt_rent (complex_id, rent_type, deal_year, deal_month, area, floor, deposit, monthly_rent)
+        VALUES (#{complexId}, #{rentType}, #{dealYear}, #{dealMonth}, #{area}, #{floor}, #{deposit}, #{monthlyRent})
+    </insert>
+
+    <!-- ============================== AptOfficialPrice ============================== -->
+
+    <resultMap id="officialPriceResultMap" type="com.example.housing.apt.model.AptOfficialPrice">
+        <id     property="id"            column="id"/>
+        <result property="complexId"     column="complex_id"/>
+        <result property="year"          column="year"/>
+        <result property="dong"          column="dong"/>
+        <result property="ho"            column="ho"/>
+        <result property="area"          column="area"/>
+        <result property="officialPrice" column="official_price"/>
+        <result property="createdAt"     column="created_at"/>
+    </resultMap>
+
+    <select id="findOfficialPricesByComplexAndYear" resultMap="officialPriceResultMap">
+        SELECT * FROM apt_official_price
+        WHERE complex_id = #{complexId} AND year = #{year}
+    </select>
+
+    <insert id="insertOfficialPrice" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO apt_official_price (complex_id, year, dong, ho, area, official_price)
+        VALUES (#{complexId}, #{year}, #{dong}, #{ho}, #{area}, #{officialPrice})
+    </insert>
+
+</mapper>

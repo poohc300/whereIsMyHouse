@@ -1,0 +1,41 @@
+name: Build & Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build Frontend
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run build
+
+      - name: Deploy Frontend
+        run: |
+          rm -rf /home/jeremy/dev/whereIsMyHouse/frontend/dist
+          cp -r frontend/dist /home/jeremy/dev/whereIsMyHouse/frontend/dist
+
+      - name: Build Backend
+        working-directory: backend
+        run: |
+          chmod +x gradlew
+          ./gradlew bootJar -x test
+
+      - name: Deploy Backend
+        run: |
+          cp backend/build/libs/*.jar /home/jeremy/dev/whereIsMyHouse/backend/app.jar
+          sudo systemctl restart housing-backend
+          sleep 5
+          sudo systemctl is-active --quiet housing-backend && echo "Backend started successfully" || (echo "Backend failed to start" && exit 1)
+
+      - name: Reload Nginx
+        run: docker exec nginx nginx -s reload

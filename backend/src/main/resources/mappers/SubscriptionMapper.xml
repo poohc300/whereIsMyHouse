@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.housing.subscription.mapper.SubscriptionMapper">
+
+    <resultMap id="announcementResultMap" type="com.example.housing.subscription.model.SubscriptionAnnouncement">
+        <id     property="id"                column="id"/>
+        <result property="announceNo"        column="announce_no"/>
+        <result property="houseName"         column="house_name"/>
+        <result property="houseType"         column="house_type"/>
+        <result property="supplyAddr"        column="supply_addr"/>
+        <result property="bjdongCode"        column="bjdong_code"/>
+        <result property="lat"               column="lat"/>
+        <result property="lng"               column="lng"/>
+        <result property="totalSupply"       column="total_supply"/>
+        <result property="receptionStartDt"  column="reception_start_dt"/>
+        <result property="receptionEndDt"    column="reception_end_dt"/>
+        <result property="winnerAnnounceDt"  column="winner_announce_dt"/>
+        <result property="minPrice"          column="min_price"/>
+        <result property="maxPrice"          column="max_price"/>
+        <result property="createdAt"         column="created_at"/>
+    </resultMap>
+
+    <select id="findAll" resultMap="announcementResultMap">
+        SELECT * FROM subscription_announcement
+        ORDER BY reception_start_dt DESC
+    </select>
+
+    <select id="findByBjdong" resultMap="announcementResultMap">
+        SELECT * FROM subscription_announcement
+        WHERE bjdong_code = #{bjdongCode}
+        ORDER BY reception_start_dt DESC
+    </select>
+
+    <select id="findActive" resultMap="announcementResultMap">
+        SELECT * FROM subscription_announcement
+        WHERE reception_start_dt &lt;= CURRENT_DATE
+          AND reception_end_dt &gt;= CURRENT_DATE
+        ORDER BY reception_end_dt ASC
+    </select>
+
+    <select id="findByAnnounceNo" resultMap="announcementResultMap">
+        SELECT * FROM subscription_announcement WHERE announce_no = #{announceNo}
+    </select>
+
+    <select id="existsByAnnounceNo" resultType="boolean">
+        SELECT EXISTS (SELECT 1 FROM subscription_announcement WHERE announce_no = #{announceNo})
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO subscription_announcement
+            (announce_no, house_name, house_type, supply_addr, bjdong_code,
+             lat, lng, total_supply,
+             reception_start_dt, reception_end_dt, winner_announce_dt,
+             min_price, max_price)
+        VALUES
+            (#{announceNo}, #{houseName}, #{houseType}, #{supplyAddr}, #{bjdongCode},
+             #{lat}, #{lng}, #{totalSupply},
+             #{receptionStartDt}, #{receptionEndDt}, #{winnerAnnounceDt},
+             #{minPrice}, #{maxPrice})
+    </insert>
+
+    <update id="updateCoords">
+        UPDATE subscription_announcement SET lat = #{lat}, lng = #{lng} WHERE id = #{id}
+    </update>
+
+</mapper>
