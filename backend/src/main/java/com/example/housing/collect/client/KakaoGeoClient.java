@@ -6,9 +6,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
-
-import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
@@ -34,12 +31,10 @@ public class KakaoGeoClient {
             HttpHeaders headers = new HttpHeaders();
             headers.set("Authorization", "KakaoAK " + restApiKey);
 
-            URI uri = UriComponentsBuilder.fromHttpUrl(GEO_URL)
-                    .queryParam("query", address)
-                    .build().toUri();
-
             ResponseEntity<Map> response = restTemplate.exchange(
-                    uri, HttpMethod.GET, new HttpEntity<>(headers), Map.class
+                    GEO_URL + "?query={query}",
+                    HttpMethod.GET, new HttpEntity<>(headers), Map.class,
+                    address
             );
 
             List<Map<String, Object>> documents = (List<Map<String, Object>>) response.getBody().get("documents");
