@@ -4,6 +4,8 @@ import com.example.housing.apt.mapper.AptMapper;
 import com.example.housing.apt.model.AptComplex;
 import com.example.housing.apt.model.AptRent;
 import com.example.housing.collect.client.PublicDataClient;
+import com.example.housing.collect.config.TargetRegions;
+import com.example.housing.collect.model.RegionCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -29,21 +31,27 @@ public class AptRentCollectService {
         List<Map<String, String>> items = publicDataClient.getAptRent(lawdCd, dealYmd);
         int saved = 0;
 
+        // lawdCd로 시도/시군구 정보를 조회해 complex 생성 시 설정
+        RegionCode region = TargetRegions.findByLawdCd(lawdCd);
+        String sigungu = region != null ? region.sigungu() : "";
+        String sido    = region != null ? region.sido()    : "";
+
         for (Map<String, String> item : items) {
             try {
-                String aptName = item.get("아파트");
-                String bjdongCode = item.getOrDefault("지역코드", lawdCd);
-                if (aptName == null) continue;
+                // 공공 API 필드명 (영문 camelCase 버전)
+                String aptName    = item.get("aptNm");
+                String bjdongCode = item.getOrDefault("sggCd", lawdCd);
+                if (aptName == null || aptName.isBlank()) continue;
 
-                AptComplex complex = complexCollectService.findOrCreate(aptName, bjdongCode);
+                AptComplex complex = complexCollectService.findOrCreate(aptName.trim(), bjdongCode.trim(), sigungu, sido);
                 if (complex == null) continue;
 
-                int year  = Integer.parseInt(item.get("년"));
-                int month = Integer.parseInt(item.get("월"));
-                double area = Double.parseDouble(item.get("전용면적").trim());
-                int floor = parseIntSafe(item.getOrDefault("층", "0"));
-                int deposit = parsePrice(item.getOrDefault("보증금액", "0"));
-                int monthlyRent = parsePrice(item.getOrDefault("월세금액", "0"));
+                int year    = Integer.parseInt(item.get("dealYear"));
+                int month   = Integer.parseInt(item.get("dealMonth"));
+                double area = Double.parseDouble(item.get("excluUseAr").trim());
+                int floor   = parseIntSafe(item.getOrDefault("floor", "0"));
+                int deposit = parsePrice(item.getOrDefault("deposit", "0"));
+                int monthlyRent = parsePrice(item.getOrDefault("monthlyRent", "0"));
                 String rentType = monthlyRent > 0 ? "월세" : "전세";
 
                 if (aptMapper.existsRent(complex.getId(), year, month, area, floor, deposit)) continue;

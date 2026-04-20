@@ -51,6 +51,20 @@
         UPDATE apt_complex SET lat = #{lat}, lng = #{lng} WHERE id = #{id}
     </update>
 
+    <!-- sigungu/sido가 비어있는 기존 레코드를 수집 시 자동 보정 -->
+    <update id="updateComplexSigunguAndSido">
+        UPDATE apt_complex SET sigungu = #{sigungu}, sido = #{sido} WHERE id = #{id}
+    </update>
+
+    <!-- 좌표 없는 단지 목록 (지오코딩 보정용) -->
+    <select id="findComplexesWithoutCoords" resultMap="complexResultMap">
+        SELECT * FROM apt_complex
+        WHERE (lat IS NULL OR lng IS NULL)
+          AND name IS NOT NULL
+          AND name != ''
+        ORDER BY id
+    </select>
+
     <!-- ============================== AptTrade ============================== -->
 
     <resultMap id="tradeResultMap" type="com.example.housing.apt.model.AptTrade">
@@ -157,5 +171,197 @@
         INSERT INTO apt_official_price (complex_id, year, dong, ho, area, official_price)
         VALUES (#{complexId}, #{year}, #{dong}, #{ho}, #{area}, #{officialPrice})
     </insert>
+
+    <!-- ============================== 추천용 쿼리 ============================== -->
+
+    <resultMap id="complexSummaryResultMap" type="com.example.housing.recommend.dto.AptComplexSummary">
+        <id     property="id"              column="id"/>
+        <result property="name"            column="name"/>
+        <result property="roadAddr"        column="road_addr"/>
+        <result property="sigungu"         column="sigungu"/>
+        <result property="dong"            column="dong"/>
+        <result property="lat"             column="lat"/>
+        <result property="lng"             column="lng"/>
+        <result property="avgTradePrice"   column="avg_trade_price"/>
+        <result property="avgDepositPrice" column="avg_deposit_price"/>
+    </resultMap>
+
+    <!-- ============================== 위경도 반경 조회 ============================== -->
+
+    <resultMap id="nearbyComplexResultMap" type="com.example.housing.apt.dto.NearbyComplexDto">
+        <id     property="id"              column="id"/>
+        <result property="name"            column="name"/>
+        <result property="roadAddr"        column="road_addr"/>
+        <result property="sigungu"         column="sigungu"/>
+        <result property="dong"            column="dong"/>
+        <result property="lat"             column="lat"/>
+        <result property="lng"             column="lng"/>
+        <result property="totalHousehold"  column="total_household"/>
+        <result property="buildYear"       column="build_year"/>
+        <result property="avgTradePrice"   column="avg_trade_price"/>
+        <result property="avgDepositPrice" column="avg_deposit_price"/>
+        <result property="distanceKm"      column="distance_km"/>
+    </resultMap>
+
+    <!--
+        [Haversine 공식 기반 반경 조회]
+
+        Haversine 공식은 구면(지구)에서 두 지점 사이의 최단 거리(대원거리)를 계산한다.
+        지구를 완전한 구(반지름 6371 km)로 가정하며, 수백 km 이하 거리에서는 충분히 정확하다.
+
+        공식:
+          d = 2R * arcsin( sqrt( sin²(Δlat/2) + cos(lat1) * cos(lat2) * sin²(Δlng/2) ) )
+
+        SQL로 변환하면 (acos 버전, 수치 안정성 주의):
+          d = R * acos( cos(lat1)*cos(lat2)*cos(lng2-lng1) + sin(lat1)*sin(lat2) )
+
+        부동소수점 오차로 acos 인자가 1.0을 미세하게 초과할 수 있어 LEAST(1.0, ...) 로 클램핑.
+
+        성능 고려사항:
+          - lat/lng 컬럼에 인덱스가 있어도 HAVING 절은 전체 스캔 후 필터링
+          - 데이터가 많을 경우 WHERE 절에 Bounding Box 선필터를 추가하면 인덱스 활용 가능
+            (현재 단지 수 기준으로는 서브쿼리 방식으로도 충분)
+    -->
+    <select id="findNearbyComplexesWithAvgPrice" resultMap="nearbyComplexResultMap">
+        SELECT *
+        FROM (
+            SELECT
+                c.id,
+                c.name,
+                c.road_addr,
+                c.sigungu,
+                c.dong,
+                c.lat,
+                c.lng,
+                c.total_household,
+                c.build_year,
+                CAST(AVG(t.price) AS INTEGER)                                           AS avg_trade_price,
+                CAST(AVG(CASE WHEN r.rent_type = '전세' THEN r.deposit END) AS INTEGER) AS avg_deposit_price,
+
+                /*
+                 * Haversine 거리 계산 (단위: km)
+                 *
+                 * 6371: 지구 평균 반지름(km)
+                 * radians(): 도(degree) → 라디안 변환 (삼각함수는 라디안 단위 사용)
+                 * #{lat}, #{lng}: 사용자가 클릭한 기준 좌표
+                 * c.lat, c.lng: DB에 저장된 각 단지의 좌표
+                 *
+                 * LEAST(1.0, ...): 부동소수점 연산 오차로 acos(x)의 x가 1.0000001처럼
+                 *   1을 초과하면 acos가 NaN을 반환하므로 상한을 1.0으로 고정
+                 */
+                (
+                    6371 * acos(
+                        LEAST(1.0,
+                            cos(radians(#{lat})) * cos(radians(c.lat))
+                            * cos(radians(c.lng) - radians(#{lng}))
+                            + sin(radians(#{lat})) * sin(radians(c.lat))
+                        )
+                    )
+                ) AS distance_km
+
+            FROM apt_complex c
+
+            /* 최근 1년 매매 실거래 JOIN (없으면 avg_trade_price = null) */
+            LEFT JOIN apt_trade t
+                   ON c.id = t.complex_id
+                  AND t.deal_year >= EXTRACT(YEAR FROM CURRENT_DATE)::int - 1
+
+            /* 최근 1년 전세 실거래 JOIN (없으면 avg_deposit_price = null) */
+            LEFT JOIN apt_rent r
+                   ON c.id = r.complex_id
+                  AND r.rent_type = '전세'
+                  AND r.deal_year >= EXTRACT(YEAR FROM CURRENT_DATE)::int - 1
+
+            /* 좌표 없는 단지는 거리 계산 불가이므로 제외 */
+            WHERE c.lat IS NOT NULL
+              AND c.lng IS NOT NULL
+
+            GROUP BY c.id, c.name, c.road_addr, c.sigungu, c.dong,
+                     c.lat, c.lng, c.total_household, c.build_year
+        ) sub
+
+        /* 서브쿼리 밖에서 distance_km alias로 반경 필터링 */
+        WHERE sub.distance_km &lt;= #{radiusKm}
+        ORDER BY sub.distance_km ASC
+        LIMIT 30
+    </select>
+
+    <!-- ============================== 지도용 쿼리 ============================== -->
+
+    <!--
+        시군구에 속한 법정동 이름 목록 (중복 제거, 가나다 정렬)
+        프론트 '읍/면/동' 드롭다운 옵션을 채우기 위한 쿼리
+    -->
+    <select id="findDongsBySigungu" resultType="string">
+        SELECT DISTINCT dong
+        FROM apt_complex
+        WHERE sigungu = #{sigungu}
+          AND dong IS NOT NULL
+          AND dong != ''
+        ORDER BY dong
+    </select>
+
+    <!--
+        시군구(+선택적 동) 기준 단지 목록 + 최근 1년 평균 매매가/전세금 (지도 마커용, 최대 100건)
+
+        dong 파라미터가 전달된 경우에만 AND c.dong = #{dong} 조건이 추가된다 (MyBatis 동적 SQL).
+        dong이 null이거나 빈 문자열이면 시군구 전체를 조회한다.
+    -->
+    <select id="findComplexesForMap" resultMap="complexSummaryResultMap">
+        SELECT
+            c.id,
+            c.name,
+            c.road_addr,
+            c.sigungu,
+            c.dong,
+            c.lat,
+            c.lng,
+            CAST(AVG(t.price) AS INTEGER)                                           AS avg_trade_price,
+            CAST(AVG(CASE WHEN r.rent_type = '전세' THEN r.deposit END) AS INTEGER) AS avg_deposit_price
+        FROM apt_complex c
+        LEFT JOIN apt_trade t
+               ON c.id = t.complex_id
+              AND t.deal_year >= EXTRACT(YEAR FROM CURRENT_DATE)::int - 1
+        LEFT JOIN apt_rent r
+               ON c.id = r.complex_id
+              AND r.deal_year >= EXTRACT(YEAR FROM CURRENT_DATE)::int - 1
+        WHERE c.sigungu = #{sigungu}
+        <if test="dong != null and dong != ''">
+            AND c.dong = #{dong}
+        </if>
+        GROUP BY c.id, c.name, c.road_addr, c.sigungu, c.dong, c.lat, c.lng
+        ORDER BY avg_trade_price ASC NULLS LAST
+        LIMIT 100
+    </select>
+
+    <!-- ============================== 추천용 쿼리 ============================== -->
+
+    <!--
+        시군구 내 단지별 최근 1년 평균 매매가 + 평균 전세금 조회 (최대 50건)
+        거래가 없는 단지도 포함하되 avg는 null로 반환됨
+    -->
+    <select id="findComplexesWithAvgPriceBySigungu" resultMap="complexSummaryResultMap">
+        SELECT
+            c.id,
+            c.name,
+            c.road_addr,
+            c.sigungu,
+            c.dong,
+            c.lat,
+            c.lng,
+            CAST(AVG(t.price) AS INTEGER)                                  AS avg_trade_price,
+            CAST(AVG(CASE WHEN r.rent_type = '전세' THEN r.deposit END) AS INTEGER) AS avg_deposit_price
+        FROM apt_complex c
+        LEFT JOIN apt_trade t
+               ON c.id = t.complex_id
+              AND t.deal_year >= EXTRACT(YEAR FROM CURRENT_DATE)::int - 1
+        LEFT JOIN apt_rent r
+               ON c.id = r.complex_id
+              AND r.deal_year >= EXTRACT(YEAR FROM CURRENT_DATE)::int - 1
+        WHERE c.sigungu = #{sigungu}
+        GROUP BY c.id, c.name, c.road_addr, c.sigungu, c.dong, c.lat, c.lng
+        ORDER BY avg_trade_price ASC NULLS LAST
+        LIMIT 50
+    </select>
 
 </mapper>

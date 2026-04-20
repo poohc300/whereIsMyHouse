@@ -13,6 +13,11 @@ const router = createRouter({
           name: 'home',
           component: HomeView,
         },
+        {
+          path: 'recommend',
+          name: 'recommend',
+          component: () => import('@/views/RecommendView.vue'),
+        },
       ],
     },
     {

@@ -38,6 +38,8 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/apt/**").permitAll()
                 .requestMatchers("/api/subscription/**").permitAll()
+                .requestMatchers("/api/recommend/**").permitAll()
+                .requestMatchers("/api/admin/**").permitAll()
                 .requestMatchers("/api/user/**").authenticated()
                 .anyRequest().authenticated()
             )
@@ -77,6 +79,7 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOriginPatterns(List.of(
             "http://localhost:3001",
+            "http://localhost:3002",
             "https://housing.nexacromancer.win"
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));

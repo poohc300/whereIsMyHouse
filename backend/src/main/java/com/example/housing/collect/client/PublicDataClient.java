@@ -25,7 +25,7 @@ import java.util.Map;
 public class PublicDataClient {
 
     private static final String APT_TRADE_URL =
-            "http://apis.data.go.kr/1613000/RTMSDataSvcAptTradeDev/getRTMSDataSvcAptTrade";
+            "http://apis.data.go.kr/1613000/RTMSDataSvcAptTrade/getRTMSDataSvcAptTrade";
     private static final String APT_RENT_URL =
             "http://apis.data.go.kr/1613000/RTMSDataSvcAptRent/getRTMSDataSvcAptRent";
     private static final String APT_COMPLEX_URL =

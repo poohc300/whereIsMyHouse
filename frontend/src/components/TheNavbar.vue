@@ -6,6 +6,7 @@
       </RouterLink>
       <nav class="flex items-center gap-4 sm:gap-6 text-sm text-gray-600">
         <RouterLink to="/" class="hover:text-black transition-colors">홈</RouterLink>
+        <RouterLink to="/recommend" class="hover:text-black transition-colors">주택 추천</RouterLink>
         <template v-if="isLoggedIn">
           <span class="text-gray-400">{{ user?.username }}</span>
           <button @click="logout" class="hover:text-black transition-colors">로그아웃</button>

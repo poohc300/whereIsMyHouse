@@ -1,0 +1,310 @@
+package com.example.housing.collect.config;
+
+import com.example.housing.collect.model.RegionCode;
+
+import java.util.List;
+
+/**
+ * 실거래가 수집 대상 지역 목록.
+ * lawdCd = 법정동코드 앞 5자리 (시군구 단위).
+ * 새 지역을 추가하려면 ALL 리스트에 RegionCode를 추가하면 된다.
+ */
+public final class TargetRegions {
+
+    private TargetRegions() {}
+
+    /** lawdCd(법정동코드 앞 5자리)로 RegionCode를 조회한다. 없으면 null 반환. */
+    public static RegionCode findByLawdCd(String lawdCd) {
+        return ALL.stream()
+                .filter(r -> r.lawdCd().equals(lawdCd))
+                .findFirst()
+                .orElse(null);
+    }
+
+    public static final List<RegionCode> ALL = List.of(
+
+        // ── 서울특별시 (25구) ─────────────────────────────────────
+        new RegionCode("서울특별시", "종로구",   "11110"),
+        new RegionCode("서울특별시", "중구",     "11140"),
+        new RegionCode("서울특별시", "용산구",   "11170"),
+        new RegionCode("서울특별시", "성동구",   "11200"),
+        new RegionCode("서울특별시", "광진구",   "11215"),
+        new RegionCode("서울특별시", "동대문구", "11230"),
+        new RegionCode("서울특별시", "중랑구",   "11260"),
+        new RegionCode("서울특별시", "성북구",   "11290"),
+        new RegionCode("서울특별시", "강북구",   "11305"),
+        new RegionCode("서울특별시", "도봉구",   "11320"),
+        new RegionCode("서울특별시", "노원구",   "11350"),
+        new RegionCode("서울특별시", "은평구",   "11380"),
+        new RegionCode("서울특별시", "서대문구", "11410"),
+        new RegionCode("서울특별시", "마포구",   "11440"),
+        new RegionCode("서울특별시", "양천구",   "11470"),
+        new RegionCode("서울특별시", "강서구",   "11500"),
+        new RegionCode("서울특별시", "구로구",   "11530"),
+        new RegionCode("서울특별시", "금천구",   "11545"),
+        new RegionCode("서울특별시", "영등포구", "11560"),
+        new RegionCode("서울특별시", "동작구",   "11590"),
+        new RegionCode("서울특별시", "관악구",   "11620"),
+        new RegionCode("서울특별시", "서초구",   "11650"),
+        new RegionCode("서울특별시", "강남구",   "11680"),
+        new RegionCode("서울특별시", "송파구",   "11710"),
+        new RegionCode("서울특별시", "강동구",   "11740"),
+
+        // ── 부산광역시 (16구군) ───────────────────────────────────
+        new RegionCode("부산광역시", "중구",     "26110"),
+        new RegionCode("부산광역시", "서구",     "26140"),
+        new RegionCode("부산광역시", "동구",     "26170"),
+        new RegionCode("부산광역시", "영도구",   "26200"),
+        new RegionCode("부산광역시", "부산진구", "26230"),
+        new RegionCode("부산광역시", "동래구",   "26260"),
+        new RegionCode("부산광역시", "남구",     "26290"),
+        new RegionCode("부산광역시", "북구",     "26320"),
+        new RegionCode("부산광역시", "해운대구", "26350"),
+        new RegionCode("부산광역시", "사하구",   "26380"),
+        new RegionCode("부산광역시", "금정구",   "26410"),
+        new RegionCode("부산광역시", "강서구",   "26440"),
+        new RegionCode("부산광역시", "연제구",   "26470"),
+        new RegionCode("부산광역시", "수영구",   "26500"),
+        new RegionCode("부산광역시", "사상구",   "26530"),
+        new RegionCode("부산광역시", "기장군",   "26710"),
+
+        // ── 대구광역시 (8구군) ────────────────────────────────────
+        new RegionCode("대구광역시", "중구",     "27110"),
+        new RegionCode("대구광역시", "동구",     "27140"),
+        new RegionCode("대구광역시", "서구",     "27170"),
+        new RegionCode("대구광역시", "남구",     "27200"),
+        new RegionCode("대구광역시", "북구",     "27230"),
+        new RegionCode("대구광역시", "수성구",   "27260"),
+        new RegionCode("대구광역시", "달서구",   "27290"),
+        new RegionCode("대구광역시", "달성군",   "27710"),
+
+        // ── 인천광역시 (10구군) ───────────────────────────────────
+        new RegionCode("인천광역시", "중구",     "22110"),
+        new RegionCode("인천광역시", "동구",     "22140"),
+        new RegionCode("인천광역시", "미추홀구", "22177"),
+        new RegionCode("인천광역시", "연수구",   "22200"),
+        new RegionCode("인천광역시", "남동구",   "22230"),
+        new RegionCode("인천광역시", "부평구",   "22260"),
+        new RegionCode("인천광역시", "계양구",   "22290"),
+        new RegionCode("인천광역시", "서구",     "22310"),
+        new RegionCode("인천광역시", "강화군",   "22370"),
+        new RegionCode("인천광역시", "옹진군",   "22380"),
+
+        // ── 광주광역시 (5구) ──────────────────────────────────────
+        new RegionCode("광주광역시", "동구",     "29110"),
+        new RegionCode("광주광역시", "서구",     "29140"),
+        new RegionCode("광주광역시", "남구",     "29155"),
+        new RegionCode("광주광역시", "북구",     "29170"),
+        new RegionCode("광주광역시", "광산구",   "29200"),
+
+        // ── 대전광역시 (5구) ──────────────────────────────────────
+        new RegionCode("대전광역시", "동구",     "30110"),
+        new RegionCode("대전광역시", "중구",     "30140"),
+        new RegionCode("대전광역시", "서구",     "30170"),
+        new RegionCode("대전광역시", "유성구",   "30200"),
+        new RegionCode("대전광역시", "대덕구",   "30230"),
+
+        // ── 울산광역시 (5구군) ────────────────────────────────────
+        new RegionCode("울산광역시", "중구",     "31110"),
+        new RegionCode("울산광역시", "남구",     "31140"),
+        new RegionCode("울산광역시", "동구",     "31170"),
+        new RegionCode("울산광역시", "북구",     "31200"),
+        new RegionCode("울산광역시", "울주군",   "31710"),
+
+        // ── 세종특별자치시 ────────────────────────────────────────
+        new RegionCode("세종특별자치시", "세종시", "36110"),
+
+        // ── 경기도 ────────────────────────────────────────────────
+        new RegionCode("경기도", "수원시", "41111"),
+        new RegionCode("경기도", "수원시", "41113"),
+        new RegionCode("경기도", "수원시", "41115"),
+        new RegionCode("경기도", "수원시", "41117"),
+        new RegionCode("경기도", "성남시", "41131"),
+        new RegionCode("경기도", "성남시", "41133"),
+        new RegionCode("경기도", "성남시", "41135"),
+        new RegionCode("경기도", "의정부시", "41150"),
+        new RegionCode("경기도", "안양시", "41171"),
+        new RegionCode("경기도", "안양시", "41173"),
+        new RegionCode("경기도", "부천시",   "41190"),
+        new RegionCode("경기도", "광명시",   "41210"),
+        new RegionCode("경기도", "평택시",   "41220"),
+        new RegionCode("경기도", "동두천시", "41250"),
+        new RegionCode("경기도", "안산시", "41271"),
+        new RegionCode("경기도", "안산시", "41273"),
+        new RegionCode("경기도", "고양시", "41281"),
+        new RegionCode("경기도", "고양시", "41285"),
+        new RegionCode("경기도", "고양시", "41287"),
+        new RegionCode("경기도", "과천시",   "41290"),
+        new RegionCode("경기도", "구리시",   "41310"),
+        new RegionCode("경기도", "남양주시", "41360"),
+        new RegionCode("경기도", "오산시",   "41370"),
+        new RegionCode("경기도", "시흥시",   "41390"),
+        new RegionCode("경기도", "군포시",   "41410"),
+        new RegionCode("경기도", "의왕시",   "41430"),
+        new RegionCode("경기도", "하남시",   "41450"),
+        new RegionCode("경기도", "용인시", "41461"),
+        new RegionCode("경기도", "용인시", "41463"),
+        new RegionCode("경기도", "용인시", "41465"),
+        new RegionCode("경기도", "파주시",   "41480"),
+        new RegionCode("경기도", "이천시",   "41500"),
+        new RegionCode("경기도", "안성시",   "41550"),
+        new RegionCode("경기도", "김포시",   "41570"),
+        new RegionCode("경기도", "화성시",   "41590"),
+        new RegionCode("경기도", "광주시",   "41610"),
+        new RegionCode("경기도", "양주시",   "41630"),
+        new RegionCode("경기도", "포천시",   "41650"),
+        new RegionCode("경기도", "여주시",   "41670"),
+        new RegionCode("경기도", "연천군",   "41800"),
+        new RegionCode("경기도", "가평군",   "41820"),
+        new RegionCode("경기도", "양평군",   "41830"),
+
+        // ── 강원특별자치도 ────────────────────────────────────────
+        new RegionCode("강원특별자치도", "춘천시",   "51110"),
+        new RegionCode("강원특별자치도", "원주시",   "51130"),
+        new RegionCode("강원특별자치도", "강릉시",   "51150"),
+        new RegionCode("강원특별자치도", "동해시",   "51170"),
+        new RegionCode("강원특별자치도", "태백시",   "51190"),
+        new RegionCode("강원특별자치도", "속초시",   "51210"),
+        new RegionCode("강원특별자치도", "삼척시",   "51230"),
+        new RegionCode("강원특별자치도", "홍천군",   "51720"),
+        new RegionCode("강원특별자치도", "횡성군",   "51730"),
+        new RegionCode("강원특별자치도", "영월군",   "51750"),
+        new RegionCode("강원특별자치도", "평창군",   "51760"),
+        new RegionCode("강원특별자치도", "정선군",   "51770"),
+        new RegionCode("강원특별자치도", "철원군",   "51780"),
+        new RegionCode("강원특별자치도", "화천군",   "51790"),
+        new RegionCode("강원특별자치도", "양구군",   "51800"),
+        new RegionCode("강원특별자치도", "인제군",   "51810"),
+        new RegionCode("강원특별자치도", "고성군",   "51820"),
+        new RegionCode("강원특별자치도", "양양군",   "51830"),
+
+        // ── 충청북도 ──────────────────────────────────────────────
+        new RegionCode("충청북도", "청주시", "43111"),
+        new RegionCode("충청북도", "청주시", "43112"),
+        new RegionCode("충청북도", "청주시", "43113"),
+        new RegionCode("충청북도", "청주시", "43114"),
+        new RegionCode("충청북도", "충주시",   "43130"),
+        new RegionCode("충청북도", "제천시",   "43150"),
+        new RegionCode("충청북도", "보은군",   "43720"),
+        new RegionCode("충청북도", "옥천군",   "43730"),
+        new RegionCode("충청북도", "영동군",   "43740"),
+        new RegionCode("충청북도", "증평군",   "43745"),
+        new RegionCode("충청북도", "진천군",   "43750"),
+        new RegionCode("충청북도", "괴산군",   "43760"),
+        new RegionCode("충청북도", "음성군",   "43770"),
+        new RegionCode("충청북도", "단양군",   "43800"),
+
+        // ── 충청남도 ──────────────────────────────────────────────
+        new RegionCode("충청남도", "천안시", "44131"),
+        new RegionCode("충청남도", "천안시", "44133"),
+        new RegionCode("충청남도", "공주시",   "44150"),
+        new RegionCode("충청남도", "보령시",   "44180"),
+        new RegionCode("충청남도", "아산시",   "44200"),
+        new RegionCode("충청남도", "서산시",   "44210"),
+        new RegionCode("충청남도", "논산시",   "44230"),
+        new RegionCode("충청남도", "계룡시",   "44250"),
+        new RegionCode("충청남도", "당진시",   "44270"),
+        new RegionCode("충청남도", "금산군",   "44710"),
+        new RegionCode("충청남도", "부여군",   "44760"),
+        new RegionCode("충청남도", "서천군",   "44770"),
+        new RegionCode("충청남도", "청양군",   "44790"),
+        new RegionCode("충청남도", "홍성군",   "44800"),
+        new RegionCode("충청남도", "예산군",   "44810"),
+        new RegionCode("충청남도", "태안군",   "44825"),
+
+        // ── 전북특별자치도 ────────────────────────────────────────
+        new RegionCode("전북특별자치도", "전주시", "52111"),
+        new RegionCode("전북특별자치도", "전주시", "52113"),
+        new RegionCode("전북특별자치도", "군산시",   "52130"),
+        new RegionCode("전북특별자치도", "익산시",   "52140"),
+        new RegionCode("전북특별자치도", "정읍시",   "52180"),
+        new RegionCode("전북특별자치도", "남원시",   "52190"),
+        new RegionCode("전북특별자치도", "김제시",   "52210"),
+        new RegionCode("전북특별자치도", "완주군",   "52710"),
+        new RegionCode("전북특별자치도", "진안군",   "52720"),
+        new RegionCode("전북특별자치도", "무주군",   "52730"),
+        new RegionCode("전북특별자치도", "장수군",   "52740"),
+        new RegionCode("전북특별자치도", "임실군",   "52750"),
+        new RegionCode("전북특별자치도", "순창군",   "52770"),
+        new RegionCode("전북특별자치도", "고창군",   "52790"),
+        new RegionCode("전북특별자치도", "부안군",   "52800"),
+
+        // ── 전라남도 ──────────────────────────────────────────────
+        new RegionCode("전라남도", "목포시",   "46110"),
+        new RegionCode("전라남도", "여수시",   "46130"),
+        new RegionCode("전라남도", "순천시",   "46150"),
+        new RegionCode("전라남도", "나주시",   "46170"),
+        new RegionCode("전라남도", "광양시",   "46230"),
+        new RegionCode("전라남도", "담양군",   "46710"),
+        new RegionCode("전라남도", "곡성군",   "46720"),
+        new RegionCode("전라남도", "구례군",   "46730"),
+        new RegionCode("전라남도", "고흥군",   "46770"),
+        new RegionCode("전라남도", "보성군",   "46780"),
+        new RegionCode("전라남도", "화순군",   "46790"),
+        new RegionCode("전라남도", "장흥군",   "46800"),
+        new RegionCode("전라남도", "강진군",   "46810"),
+        new RegionCode("전라남도", "해남군",   "46820"),
+        new RegionCode("전라남도", "영암군",   "46830"),
+        new RegionCode("전라남도", "무안군",   "46840"),
+        new RegionCode("전라남도", "함평군",   "46860"),
+        new RegionCode("전라남도", "영광군",   "46870"),
+        new RegionCode("전라남도", "장성군",   "46880"),
+        new RegionCode("전라남도", "완도군",   "46890"),
+        new RegionCode("전라남도", "진도군",   "46900"),
+        new RegionCode("전라남도", "신안군",   "46910"),
+
+        // ── 경상북도 ──────────────────────────────────────────────
+        new RegionCode("경상북도", "포항시", "47111"),
+        new RegionCode("경상북도", "포항시", "47113"),
+        new RegionCode("경상북도", "경주시",   "47130"),
+        new RegionCode("경상북도", "김천시",   "47150"),
+        new RegionCode("경상북도", "안동시",   "47170"),
+        new RegionCode("경상북도", "구미시",   "47190"),
+        new RegionCode("경상북도", "영주시",   "47210"),
+        new RegionCode("경상북도", "영천시",   "47230"),
+        new RegionCode("경상북도", "상주시",   "47250"),
+        new RegionCode("경상북도", "문경시",   "47280"),
+        new RegionCode("경상북도", "경산시",   "47290"),
+        new RegionCode("경상북도", "군위군",   "47720"),
+        new RegionCode("경상북도", "의성군",   "47730"),
+        new RegionCode("경상북도", "청송군",   "47740"),
+        new RegionCode("경상북도", "영양군",   "47750"),
+        new RegionCode("경상북도", "영덕군",   "47760"),
+        new RegionCode("경상북도", "청도군",   "47820"),
+        new RegionCode("경상북도", "고령군",   "47830"),
+        new RegionCode("경상북도", "성주군",   "47840"),
+        new RegionCode("경상북도", "칠곡군",   "47850"),
+        new RegionCode("경상북도", "예천군",   "47900"),
+        new RegionCode("경상북도", "봉화군",   "47920"),
+        new RegionCode("경상북도", "울진군",   "47930"),
+        new RegionCode("경상북도", "울릉군",   "47940"),
+
+        // ── 경상남도 ──────────────────────────────────────────────
+        new RegionCode("경상남도", "창원시", "48121"),
+        new RegionCode("경상남도", "창원시", "48123"),
+        new RegionCode("경상남도", "창원시", "48125"),
+        new RegionCode("경상남도", "창원시", "48127"),
+        new RegionCode("경상남도", "창원시", "48129"),
+        new RegionCode("경상남도", "진주시",   "48170"),
+        new RegionCode("경상남도", "통영시",   "48220"),
+        new RegionCode("경상남도", "사천시",   "48240"),
+        new RegionCode("경상남도", "김해시",   "48250"),
+        new RegionCode("경상남도", "밀양시",   "48270"),
+        new RegionCode("경상남도", "거제시",   "48310"),
+        new RegionCode("경상남도", "양산시",   "48330"),
+        new RegionCode("경상남도", "의령군",   "48720"),
+        new RegionCode("경상남도", "함안군",   "48730"),
+        new RegionCode("경상남도", "창녕군",   "48740"),
+        new RegionCode("경상남도", "고성군",   "48820"),
+        new RegionCode("경상남도", "남해군",   "48840"),
+        new RegionCode("경상남도", "하동군",   "48850"),
+        new RegionCode("경상남도", "산청군",   "48860"),
+        new RegionCode("경상남도", "함양군",   "48870"),
+        new RegionCode("경상남도", "거창군",   "48880"),
+        new RegionCode("경상남도", "합천군",   "48890"),
+
+        // ── 제주특별자치도 ────────────────────────────────────────
+        new RegionCode("제주특별자치도", "제주시",   "50110"),
+        new RegionCode("제주특별자치도", "서귀포시", "50130")
+    );
+}
