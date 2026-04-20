@@ -16,7 +16,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class KakaoGeoClient {
 
-    private static final String GEO_URL = "https://dapi.kakao.com/v2/local/search/address.json";
+    private static final String GEO_URL = "https://dapi.kakao.com/v2/local/search/keyword.json";
 
     private final RestTemplate restTemplate;
 
