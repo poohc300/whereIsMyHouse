@@ -70,14 +70,17 @@ public class AptComplexCollectService {
      * 단지를 이름+법정동 기준으로 찾고, 없으면 최소 정보로 생성한다 (실거래가 수집 시 사용).
      * sigungu / sido 를 함께 전달하면 지역 필터 쿼리에서 올바르게 조회된다.
      */
-    public AptComplex findOrCreate(String name, String bjdongCode, String sigungu, String sido) {
+    public AptComplex findOrCreate(String name, String bjdongCode, String sigungu, String sido, String dong) {
         AptComplex existing = aptMapper.findComplexByNameAndBjdong(name, bjdongCode);
         if (existing != null) {
-            // 이전 수집에서 sigungu 없이 저장된 경우 자동 보정
             if ((existing.getSigungu() == null || existing.getSigungu().isBlank()) && !sigungu.isBlank()) {
                 aptMapper.updateComplexSigunguAndSido(existing.getId(), sigungu, sido);
                 existing.setSigungu(sigungu);
                 existing.setSido(sido);
+            }
+            if ((existing.getDong() == null || existing.getDong().isBlank()) && dong != null && !dong.isBlank()) {
+                aptMapper.updateComplexDong(existing.getId(), dong);
+                existing.setDong(dong);
             }
             return existing;
         }
@@ -88,6 +91,7 @@ public class AptComplexCollectService {
         complex.setBjdongCode(bjdongCode);
         complex.setSigungu(sigungu != null ? sigungu : "");
         complex.setSido(sido != null ? sido : "");
+        complex.setDong(dong != null ? dong : "");
 
         // 시군구 포함 검색어 사용 시 정확도가 높아짐 (예: "마포구 래미안푸르지오")
         String geocodeQuery = (sigungu != null && !sigungu.isBlank())

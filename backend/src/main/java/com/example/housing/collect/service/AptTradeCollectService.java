@@ -41,9 +41,10 @@ public class AptTradeCollectService {
                 // 공공 API 필드명 (영문 camelCase 버전)
                 String aptName    = item.get("aptNm");
                 String bjdongCode = item.getOrDefault("sggCd", lawdCd);
+                String dong       = item.getOrDefault("umdNm", "");
                 if (aptName == null || aptName.isBlank()) continue;
 
-                AptComplex complex = complexCollectService.findOrCreate(aptName.trim(), bjdongCode.trim(), sigungu, sido);
+                AptComplex complex = complexCollectService.findOrCreate(aptName.trim(), bjdongCode.trim(), sigungu, sido, dong);
                 if (complex == null) continue;
 
                 int year  = Integer.parseInt(item.get("dealYear"));

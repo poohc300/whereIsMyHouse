@@ -56,6 +56,10 @@
         UPDATE apt_complex SET sigungu = #{sigungu}, sido = #{sido} WHERE id = #{id}
     </update>
 
+    <update id="updateComplexDong">
+        UPDATE apt_complex SET dong = #{dong} WHERE id = #{id}
+    </update>
+
     <!-- 좌표 없는 단지 목록 (지오코딩 보정용) -->
     <select id="findComplexesWithoutCoords" resultMap="complexResultMap">
         SELECT * FROM apt_complex

@@ -13,6 +13,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Copy Frontend Env
+        run: cp /home/jeremy/dev/whereIsMyHouse/frontend/.env frontend/.env
+
       - name: Build Frontend
         working-directory: frontend
         run: |

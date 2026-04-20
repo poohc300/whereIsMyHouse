@@ -22,6 +22,7 @@ public interface AptMapper {
     void insertComplex(AptComplex complex);
     void updateComplexCoords(@Param("id") Long id, @Param("lat") Double lat, @Param("lng") Double lng);
     void updateComplexSigunguAndSido(@Param("id") Long id, @Param("sigungu") String sigungu, @Param("sido") String sido);
+    void updateComplexDong(@Param("id") Long id, @Param("dong") String dong);
     List<AptComplex> findComplexesWithoutCoords();
 
     // 매매 실거래가
