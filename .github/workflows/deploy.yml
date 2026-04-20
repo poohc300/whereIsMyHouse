@@ -21,8 +21,8 @@ jobs:
 
       - name: Deploy Frontend
         run: |
-          rm -rf /home/jeremy/dev/whereIsMyHouse/frontend/dist
-          cp -r frontend/dist /home/jeremy/dev/whereIsMyHouse/frontend/dist
+          rm -rf /home/jeremy/dev/whereIsMyHouse/frontend/dist/*
+          cp -r frontend/dist/. /home/jeremy/dev/whereIsMyHouse/frontend/dist/
 
       - name: Build Backend
         working-directory: backend
