@@ -5,6 +5,16 @@ export interface Region {
 
 export const regions: Region[] = [
   {
+    sido: '부산광역시',
+    sigungu: [
+      '강서구', '금정구', '기장군', '남구', '동구', '동래구', '부산진구', '북구',
+      '사상구', '사하구', '서구', '수영구', '연제구', '영도구', '중구', '해운대구',
+    ],
+  },
+]
+
+export const _allRegions: Region[] = [
+  {
     sido: '서울특별시',
     sigungu: [
       '강남구', '강동구', '강북구', '강서구', '관악구', '광진구', '구로구', '금천구',
