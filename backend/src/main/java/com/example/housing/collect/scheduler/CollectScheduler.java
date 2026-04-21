@@ -4,6 +4,8 @@ import com.example.housing.collect.config.TargetRegions;
 import com.example.housing.collect.model.RegionCode;
 import com.example.housing.collect.service.AptRentCollectService;
 import com.example.housing.collect.service.AptTradeCollectService;
+import com.example.housing.collect.service.OffiRentCollectService;
+import com.example.housing.collect.service.OffiTradeCollectService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -18,8 +20,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CollectScheduler {
 
-    private final AptTradeCollectService tradeCollectService;
-    private final AptRentCollectService  rentCollectService;
+    private final AptTradeCollectService  tradeCollectService;
+    private final AptRentCollectService   rentCollectService;
+    private final OffiTradeCollectService offiTradeCollectService;
+    private final OffiRentCollectService  offiRentCollectService;
 
     // 거래년월 포맷 (공공API 규격: yyyyMM)
     private static final DateTimeFormatter YMD_FMT = DateTimeFormatter.ofPattern("yyyyMM");
@@ -79,6 +83,8 @@ public class CollectScheduler {
                 try {
                     tradeCollectService.collect(region.lawdCd(), dealYmd);
                     rentCollectService.collect(region.lawdCd(), dealYmd);
+                    offiTradeCollectService.collect(region.lawdCd(), dealYmd);
+                    offiRentCollectService.collect(region.lawdCd(), dealYmd);
                 } catch (Exception e) {
                     log.error("[수집 오류] region={}/{}, dealYmd={}: {}",
                             region.sido(), region.sigungu(), dealYmd, e.getMessage());

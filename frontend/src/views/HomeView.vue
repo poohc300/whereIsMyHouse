@@ -72,6 +72,35 @@
     <div class="flex-1 relative overflow-hidden min-h-[50vh] md:min-h-0">
       <div ref="mapContainer" class="w-full h-full" />
 
+      <!-- 레이어 토글 버튼 (조회 후 표시) -->
+      <Transition name="fade">
+        <div
+          v-if="hasSearched"
+          class="absolute top-3 right-3 flex gap-2 z-10"
+        >
+          <button
+            @click="toggleLayer('apt')"
+            :class="[
+              'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium shadow transition-all',
+              showApt ? 'bg-blue-500 text-white' : 'bg-white text-gray-400 border border-gray-200'
+            ]"
+          >
+            <span class="w-2.5 h-2.5 rounded-full" :class="showApt ? 'bg-white' : 'bg-blue-400'"></span>
+            아파트
+          </button>
+          <button
+            @click="toggleLayer('offi')"
+            :class="[
+              'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium shadow transition-all',
+              showOffi ? 'bg-orange-500 text-white' : 'bg-white text-gray-400 border border-gray-200'
+            ]"
+          >
+            <span class="w-2.5 h-2.5 rounded-full" :class="showOffi ? 'bg-white' : 'bg-orange-400'"></span>
+            오피스텔
+          </button>
+        </div>
+      </Transition>
+
       <!-- 초기 안내 오버레이 (아직 조회 전) -->
       <Transition name="fade">
         <div
@@ -83,7 +112,7 @@
             <p class="text-gray-500 text-sm leading-relaxed">
               왼쪽에서 지역을 선택하고<br>
               <span class="font-medium text-gray-700">조회하기</span>를 누르면<br>
-              아파트 실거래 정보가 지도에 표시됩니다.
+              아파트·오피스텔 실거래 정보가 지도에 표시됩니다.
             </p>
           </div>
         </div>
@@ -120,7 +149,21 @@ const dongPlaceholder = computed(() => {
 
 // ── 지도 ───────────────────────────────────────────────────────
 const mapContainer = ref<HTMLElement | null>(null)
-const { initMap, drawMarkers, clearMarkers } = useAptMap(mapContainer)
+const { initMap, drawMarkers, clearMarkers, setMarkersVisible } = useAptMap(mapContainer)
+
+// ── 레이어 토글 ────────────────────────────────────────────────
+const showApt  = ref(true)
+const showOffi = ref(true)
+
+function toggleLayer(type: 'apt' | 'offi') {
+  if (type === 'apt') {
+    showApt.value = !showApt.value
+    setMarkersVisible('apt', showApt.value)
+  } else {
+    showOffi.value = !showOffi.value
+    setMarkersVisible('offi', showOffi.value)
+  }
+}
 
 // ── 조회 상태 ──────────────────────────────────────────────────
 const hasSearched = ref(false)
@@ -140,8 +183,10 @@ function onSidoChange() {
   selectedDong.value    = ''
   dongs.value           = []
   clearMarkers()
-  totalCount.value = 0
+  totalCount.value  = 0
   hasSearched.value = false
+  showApt.value     = true
+  showOffi.value    = true
 }
 
 async function onSigunguChange() {
@@ -174,17 +219,23 @@ async function search() {
   error.value   = ''
   clearMarkers()
 
+  const params = {
+    sigungu: selectedSigungu.value,
+    ...(selectedDong.value ? { dong: selectedDong.value } : {}),
+  }
+
   try {
-    const { data } = await axios.get<AptComplexSummary[]>(`${apiBase}/api/apt/complexes/area`, {
-      params: {
-        sigungu: selectedSigungu.value,
-        ...(selectedDong.value ? { dong: selectedDong.value } : {}),
-      },
-    })
+    const [aptRes, offiRes] = await Promise.all([
+      axios.get<AptComplexSummary[]>(`${apiBase}/api/apt/complexes/area`, { params }),
+      axios.get<AptComplexSummary[]>(`${apiBase}/api/offi/complexes/area`, { params }),
+    ])
 
     hasSearched.value = true
-    totalCount.value  = data.length
-    drawMarkers(data)
+    totalCount.value  = aptRes.data.length + offiRes.data.length
+    showApt.value  = true
+    showOffi.value = true
+    drawMarkers(aptRes.data, 'apt')
+    drawMarkers(offiRes.data, 'offi')
   } catch {
     error.value = '실거래 정보를 불러오는 데 실패했습니다.'
   } finally {

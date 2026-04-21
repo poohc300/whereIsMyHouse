@@ -37,6 +37,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/apt/**").permitAll()
+                .requestMatchers("/api/offi/**").permitAll()
                 .requestMatchers("/api/subscription/**").permitAll()
                 .requestMatchers("/api/recommend/**").permitAll()
                 .requestMatchers("/api/admin/**").permitAll()

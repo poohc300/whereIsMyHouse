@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.housing.offi.mapper.OffiMapper">
+
+    <resultMap id="complexResultMap" type="com.example.housing.offi.model.OffiComplex">
+        <id     property="id"          column="id"/>
+        <result property="name"        column="name"/>
+        <result property="sido"        column="sido"/>
+        <result property="sigungu"     column="sigungu"/>
+        <result property="dong"        column="dong"/>
+        <result property="bjdongCode"  column="bjdong_code"/>
+        <result property="lat"         column="lat"/>
+        <result property="lng"         column="lng"/>
+        <result property="createdAt"   column="created_at"/>
+    </resultMap>
+
+    <select id="findComplexByNameAndBjdong" resultMap="complexResultMap">
+        SELECT * FROM offi_complex
+        WHERE name = #{name} AND bjdong_code = #{bjdongCode}
+        LIMIT 1
+    </select>
+
+    <insert id="insertComplex" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO offi_complex (name, sido, sigungu, dong, bjdong_code)
+        VALUES (#{name}, #{sido}, #{sigungu}, #{dong}, #{bjdongCode})
+        ON CONFLICT (name, bjdong_code) DO NOTHING
+    </insert>
+
+    <update id="updateComplexCoords">
+        UPDATE offi_complex SET lat = #{lat}, lng = #{lng} WHERE id = #{id}
+    </update>
+
+    <!-- ============================== OffiTrade ============================== -->
+
+    <select id="existsTrade" resultType="boolean">
+        SELECT EXISTS (
+            SELECT 1 FROM offi_trade
+            WHERE complex_id = #{complexId}
+              AND deal_year  = #{dealYear}
+              AND deal_month = #{dealMonth}
+              AND deal_day   = #{dealDay}
+              AND area       = #{area}
+              AND floor      = #{floor}
+        )
+    </select>
+
+    <insert id="insertTrade" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO offi_trade (complex_id, deal_year, deal_month, deal_day, area, floor, price)
+        VALUES (#{complexId}, #{dealYear}, #{dealMonth}, #{dealDay}, #{area}, #{floor}, #{price})
+    </insert>
+
+    <!-- ============================== OffiRent ============================== -->
+
+    <select id="existsRent" resultType="boolean">
+        SELECT EXISTS (
+            SELECT 1 FROM offi_rent
+            WHERE complex_id = #{complexId}
+              AND deal_year  = #{dealYear}
+              AND deal_month = #{dealMonth}
+              AND area       = #{area}
+              AND floor      = #{floor}
+              AND deposit    = #{deposit}
+        )
+    </select>
+
+    <insert id="insertRent" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO offi_rent (complex_id, rent_type, deal_year, deal_month, area, floor, deposit, monthly_rent)
+        VALUES (#{complexId}, #{rentType}, #{dealYear}, #{dealMonth}, #{area}, #{floor}, #{deposit}, #{monthlyRent})
+    </insert>
+
+    <!-- ============================== 지도용 쿼리 ============================== -->
+
+    <resultMap id="complexSummaryResultMap" type="com.example.housing.recommend.dto.AptComplexSummary">
+        <id     property="id"              column="id"/>
+        <result property="name"            column="name"/>
+        <result property="sigungu"         column="sigungu"/>
+        <result property="dong"            column="dong"/>
+        <result property="lat"             column="lat"/>
+        <result property="lng"             column="lng"/>
+        <result property="avgTradePrice"   column="avg_trade_price"/>
+        <result property="avgDepositPrice" column="avg_deposit_price"/>
+    </resultMap>
+
+    <select id="findComplexesForMap" resultMap="complexSummaryResultMap">
+        SELECT
+            c.id,
+            c.name,
+            c.sigungu,
+            c.dong,
+            c.lat,
+            c.lng,
+            CAST(AVG(t.price) AS INTEGER)                                           AS avg_trade_price,
+            CAST(AVG(CASE WHEN r.rent_type = '전세' THEN r.deposit END) AS INTEGER) AS avg_deposit_price
+        FROM offi_complex c
+        LEFT JOIN offi_trade t
+               ON c.id = t.complex_id
+              AND t.deal_year >= EXTRACT(YEAR FROM CURRENT_DATE)::int - 1
+        LEFT JOIN offi_rent r
+               ON c.id = r.complex_id
+              AND r.deal_year >= EXTRACT(YEAR FROM CURRENT_DATE)::int - 1
+        WHERE c.sigungu = #{sigungu}
+        <if test="dong != null and dong != ''">
+            AND c.dong = #{dong}
+        </if>
+        GROUP BY c.id, c.name, c.sigungu, c.dong, c.lat, c.lng
+        ORDER BY avg_trade_price ASC NULLS LAST
+        LIMIT 100
+    </select>
+
+</mapper>

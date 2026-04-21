@@ -28,6 +28,10 @@ public class PublicDataClient {
             "http://apis.data.go.kr/1613000/RTMSDataSvcAptTrade/getRTMSDataSvcAptTrade";
     private static final String APT_RENT_URL =
             "http://apis.data.go.kr/1613000/RTMSDataSvcAptRent/getRTMSDataSvcAptRent";
+    private static final String OFFI_TRADE_URL =
+            "http://apis.data.go.kr/1613000/RTMSDataSvcOffiTrade/getRTMSDataSvcOffiTrade";
+    private static final String OFFI_RENT_URL =
+            "http://apis.data.go.kr/1613000/RTMSDataSvcOffiRent/getRTMSDataSvcOffiRent";
     private static final String APT_COMPLEX_URL =
             "http://apis.data.go.kr/1613000/AptListService2/getAptList";
     private static final String OFFICIAL_PRICE_URL =
@@ -66,6 +70,24 @@ public class PublicDataClient {
      */
     public List<Map<String, String>> getAptRent(String lawdCd, String dealYmd) {
         String url = APT_RENT_URL
+                + "?serviceKey=" + getApiKey()
+                + "&LAWD_CD=" + lawdCd
+                + "&DEAL_YMD=" + dealYmd
+                + "&pageNo=1&numOfRows=1000";
+        return fetchXmlItems(url);
+    }
+
+    public List<Map<String, String>> getOffiTrade(String lawdCd, String dealYmd) {
+        String url = OFFI_TRADE_URL
+                + "?serviceKey=" + getApiKey()
+                + "&LAWD_CD=" + lawdCd
+                + "&DEAL_YMD=" + dealYmd
+                + "&pageNo=1&numOfRows=1000";
+        return fetchXmlItems(url);
+    }
+
+    public List<Map<String, String>> getOffiRent(String lawdCd, String dealYmd) {
+        String url = OFFI_RENT_URL
                 + "?serviceKey=" + getApiKey()
                 + "&LAWD_CD=" + lawdCd
                 + "&DEAL_YMD=" + dealYmd
