@@ -1,8 +1,8 @@
 <template>
-  <div class="flex h-[calc(100vh-64px)]">
+  <div class="flex flex-col md:flex-row h-[calc(100vh-64px)]">
 
-    <!-- ── 왼쪽 컨트롤 패널 ──────────────────────────────────── -->
-    <aside class="w-72 flex-shrink-0 border-r border-gray-200 bg-white flex flex-col overflow-y-auto">
+    <!-- ── 컨트롤 패널 (모바일: 상단 / PC: 좌측) ─────────────── -->
+    <aside class="w-full md:w-72 md:flex-shrink-0 border-b md:border-b-0 md:border-r border-gray-200 bg-white flex flex-col overflow-y-auto max-h-[45vh] md:max-h-none">
       <div class="p-6 space-y-4">
         <h2 class="text-base font-bold text-gray-900">지역별 실거래가 조회</h2>
 
@@ -69,7 +69,7 @@
     </aside>
 
     <!-- ── 카카오 지도 ──────────────────────────────────────────── -->
-    <div class="flex-1 relative overflow-hidden">
+    <div class="flex-1 relative overflow-hidden min-h-[50vh] md:min-h-0">
       <div ref="mapContainer" class="w-full h-full" />
 
       <!-- 초기 안내 오버레이 (아직 조회 전) -->
